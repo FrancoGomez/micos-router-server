@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Ticket {
+  id                     String   @id @default(uuid())
+  message_id_original    String   @unique
+  subject                String
+  from_name              String
+  from_email             String
+  origen_real            String
+  sector_principal       String
+  sectores_involucrados  Json
+  estado                 String   @default("open")
+  is_answered_global     Boolean  @default(false)
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+
+  messages TicketMessage[]
+}
+
+model TicketMessage {
+  id          String   @id @default(uuid())
+  ticketId    String
+  message_id  String
+  from_email  String
+  from_name   String
+  html        String?
+  text        String?
+  created_at  DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id])
+
+  @@index([ticketId])
+}
+
+model SyncLog {
+  id        String   @id @default(uuid())
+  source    String
+  last_sync DateTime
+}
